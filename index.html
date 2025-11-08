@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DodgeScape</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="start-menu" class="menu">
+        <div id="tutorial-text">
+            <h1>DodgeScape</h1>
+            <p>WASD 또는 화살표 키로 이동하세요.</p>
+            <p>날아오는 모든 것들로부터 최대한 오래 살아남으세요.</p>
+            <p class="press-key">시작하려면 아무 키나 누르세요</p>
+        </div>
+        <div id="countdown-text"></div>
+    </div>
+    <div class="ui-container">
+        <div class="score-container">
+            <span>생존 시간: <span id="current-time">0</span>초</span>
+        </div>
+        <div class="score-container">
+            <span>최고 기록: <span id="high-score">0</span>초</span>
+        </div>
+    </div>
+    <canvas id="gameCanvas"></canvas>
+    <div id="game-over-menu" class="menu">
+        <h1>게임 오버</h1>
+        <p>최종 생존 시간: <span id="final-score">0</span>초</p>
+        <button id="restart-button">다시 시작 (R)</button>
+    </div>
+     <div id="pause-menu" class="menu">
+        <h1>일시정지</h1>
+        <p>다시 시작하려면 'P' 키를 누르세요.</p>
+    </div>
+    <script src="game.js"></script>
+</body>
+</html>
