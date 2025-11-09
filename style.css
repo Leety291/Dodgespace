@@ -39,10 +39,13 @@ canvas {
     display: none; /* 평소에는 숨김 */
     position: absolute;
     text-align: center;
-    background-color: rgba(0, 0, 0, 0.75);
+    background-color: rgba(0, 0, 0, 0.6); /* 약간 더 투명하게 */
     padding: 40px;
     border-radius: 15px;
-    border: 2px solid #5a786d;
+    border: 2px solid #4deeea; /* 플레이어 색상으로 변경 */
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px); /* Safari 지원 */
+    box-shadow: 0 0 20px rgba(77, 238, 234, 0.3); /* 글로우 효과 */
 }
 
 .menu h1 {

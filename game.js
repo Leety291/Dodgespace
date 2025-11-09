@@ -32,6 +32,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let elapsedTime = 0;
     let timeSinceLastSpawn = 0;
     let timeSinceLastPattern = 0;
+    let warnings = [];
+    let isPatternActive = false;
     let highScore = localStorage.getItem('dodgeScapeHighScore') || 0;
     highScoreEl.textContent = highScore;
 
@@ -168,6 +170,8 @@ document.addEventListener('DOMContentLoaded', () => {
         player = new Player(canvasWidth / 2, canvasHeight / 2, playerRadius, playerColor);
         arrows = [];
         keys = {};
+        warnings = [];
+        isPatternActive = false;
         
         const now = performance.now();
         lastFrameTime = now;
@@ -233,7 +237,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let x, y;
         const edge = Math.floor(Math.random() * 4);
         const size = 20;
-        const currentArrowSpeed = 2 + (elapsedTime * 0.2);
+        const currentArrowSpeed = 2 + (elapsedTime * 0.18);
 
         switch (edge) {
             case 0: x = Math.random() * canvasWidth; y = 0 - size; break;
@@ -249,73 +253,97 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-    function triggerBarragePattern() {
+    function spawnBarrage(edge) {
         const arrowCount = 15;
-        const speed = 3 + (elapsedTime * 0.1);
-        const edge = Math.floor(Math.random() * 4);
+        const speed = 3 + (elapsedTime * 0.09);
         const size = 18;
-        const gapSize = 4; // Number of arrows to skip, creating a gap
-
+        const gapSize = 4;
         const startOfGap = Math.floor(arrowCount / 2) - Math.floor(gapSize / 2);
         const endOfGap = startOfGap + gapSize;
 
         for (let i = 0; i < arrowCount; i++) {
-            // Create a gap for the player to dodge
-            if (i >= startOfGap && i < endOfGap) {
-                continue;
-            }
+            if (i >= startOfGap && i < endOfGap) continue;
 
             let x, y, velocity;
-            
-            // Correctly use width for top/bottom and height for left/right
             const isHorizontalEdge = edge === 0 || edge === 2;
             const length = isHorizontalEdge ? canvasWidth : canvasHeight;
             const positionAlongEdge = (length / arrowCount) * (i + 0.5);
 
             switch (edge) {
-                case 0: // Top
-                    x = positionAlongEdge;
-                    y = 0 - size;
-                    velocity = { x: 0, y: speed };
-                    break;
-                case 1: // Right
-                    x = canvasWidth + size;
-                    y = positionAlongEdge;
-                    velocity = { x: -speed, y: 0 };
-                    break;
-                case 2: // Bottom
-                    x = positionAlongEdge;
-                    y = canvasHeight + size;
-                    velocity = { x: 0, y: -speed };
-                    break;
-                case 3: // Left
-                    x = 0 - size;
-                    y = positionAlongEdge;
-                    velocity = { x: speed, y: 0 };
-                    break;
+                case 0: x = positionAlongEdge; y = 0 - size; velocity = { x: 0, y: speed }; break;
+                case 1: x = canvasWidth + size; y = positionAlongEdge; velocity = { x: -speed, y: 0 }; break;
+                case 2: x = positionAlongEdge; y = canvasHeight + size; velocity = { x: 0, y: -speed }; break;
+                case 3: x = 0 - size; y = positionAlongEdge; velocity = { x: speed, y: 0 }; break;
             }
             arrows.push(new Arrow(x, y, velocity, size, '#FFD700', 'pattern'));
         }
     }
 
-    function triggerCrossPattern() {
+    function triggerBarragePattern() {
+        isPatternActive = true;
+        const warningDuration = 1.5;
+        const edge = Math.floor(Math.random() * 4);
+        const size = 40; // Warning area thickness
+        let rect;
+
+        switch (edge) {
+            case 0: rect = { x: 0, y: 0, width: canvasWidth, height: size }; break;
+            case 1: rect = { x: canvasWidth - size, y: 0, width: size, height: canvasHeight }; break;
+            case 2: rect = { x: 0, y: canvasHeight - size, width: canvasWidth, height: size }; break;
+            case 3: rect = { x: 0, y: 0, width: size, height: canvasHeight }; break;
+        }
+        warnings.push({ ...rect, endTime: elapsedTime + warningDuration });
+
+        setTimeout(() => {
+            spawnBarrage(edge);
+            isPatternActive = false;
+        }, warningDuration * 1000);
+    }
+
+    function spawnCross() {
         const arrowsPerSide = 3;
-        const speed = 2.5 + (elapsedTime * 0.15);
+        const speed = 2.5 + (elapsedTime * 0.13);
         const size = 20;
-        const spacing = 40; // Increased spacing
+        const spacing = 40;
 
         for (let i = 0; i < arrowsPerSide; i++) {
             const offset = (i - Math.floor(arrowsPerSide / 2)) * spacing;
-
-            // Top to Bottom
             arrows.push(new Arrow(canvasWidth / 2 + offset, 0 - size, { x: 0, y: speed }, size, '#ADD8E6', 'pattern'));
-            // Bottom to Top
             arrows.push(new Arrow(canvasWidth / 2 + offset, canvasHeight + size, { x: 0, y: -speed }, size, '#ADD8E6', 'pattern'));
-            // Left to Right
             arrows.push(new Arrow(0 - size, canvasHeight / 2 + offset, { x: speed, y: 0 }, size, '#ADD8E6', 'pattern'));
-            // Right to Left
             arrows.push(new Arrow(canvasWidth + size, canvasHeight / 2 + offset, { x: -speed, y: 0 }, size, '#ADD8E6', 'pattern'));
         }
+    }
+
+    function triggerCrossPattern() {
+        isPatternActive = true;
+        const warningDuration = 1.5;
+        const size = 40; // Warning area thickness
+        const arrowsPerSide = 3;
+        const spacing = 40;
+        const totalWidth = (arrowsPerSide - 1) * spacing + size;
+
+        // Horizontal warning
+        warnings.push({
+            x: 0,
+            y: canvasHeight / 2 - totalWidth / 2,
+            width: canvasWidth,
+            height: totalWidth,
+            endTime: elapsedTime + warningDuration
+        });
+        // Vertical warning
+        warnings.push({
+            x: canvasWidth / 2 - totalWidth / 2,
+            y: 0,
+            width: totalWidth,
+            height: canvasHeight,
+            endTime: elapsedTime + warningDuration
+        });
+
+        setTimeout(() => {
+            spawnCross();
+            isPatternActive = false;
+        }, warningDuration * 1000);
     }
 
     function triggerRandomPattern() {
@@ -343,6 +371,17 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.fillStyle = 'rgba(44, 62, 53, 0.4)';
         ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
+        // Draw warnings
+        if (warnings.length > 0) {
+            ctx.fillStyle = 'rgba(255, 80, 80, 0.3)';
+            for (const warning of warnings) {
+                ctx.fillRect(warning.x, warning.y, warning.width, warning.height);
+            }
+            // Remove expired warnings
+            warnings = warnings.filter(w => w.endTime > elapsedTime);
+        }
+
+
         player.update();
         player.draw();
 
@@ -354,12 +393,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         timeSinceLastPattern += deltaTime;
-        if (timeSinceLastPattern > 10000) {
+        if (timeSinceLastPattern > 10000 && !isPatternActive) {
             triggerRandomPattern();
             timeSinceLastPattern = 0;
         }
 
-        const ARROW_LIFETIME = 13; // seconds
+        const ARROW_LIFETIME = 5; // seconds
         for (let i = arrows.length - 1; i >= 0; i--) {
             const arrow = arrows[i];
             arrow.update();
