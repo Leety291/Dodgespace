@@ -237,7 +237,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let x, y;
         const edge = Math.floor(Math.random() * 4);
         const size = 20;
-        const currentArrowSpeed = 2 + (elapsedTime * 0.18);
+        const currentArrowSpeed = 2;
 
         switch (edge) {
             case 0: x = Math.random() * canvasWidth; y = 0 - size; break;
