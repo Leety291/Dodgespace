@@ -222,8 +222,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Core Gameplay Logic ---
     function setCanvasSize() {
-        canvasWidth = window.innerWidth * 0.9;
-        canvasHeight = window.innerHeight * 0.9;
+        canvasWidth = window.innerWidth * 0.7;
+        canvasHeight = window.innerHeight * 0.7;
         canvas.width = canvasWidth;
         canvas.height = canvasHeight;
     }
@@ -386,7 +386,7 @@ document.addEventListener('DOMContentLoaded', () => {
         player.draw();
 
         timeSinceLastSpawn += deltaTime;
-        const currentSpawnInterval = Math.max(100, 800 - (elapsedTime * 10));
+        const currentSpawnInterval = Math.max(100, 1000 - (elapsedTime * 8));
         if (timeSinceLastSpawn > currentSpawnInterval) {
             spawnArrow();
             timeSinceLastSpawn = 0;
